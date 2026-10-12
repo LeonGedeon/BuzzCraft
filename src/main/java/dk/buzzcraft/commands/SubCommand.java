@@ -2,9 +2,20 @@ package dk.buzzcraft.commands;
 
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
+import java.util.List;
+
 public abstract class SubCommand {
     public abstract String getName();
     public abstract String getDescription();
     public abstract String getSyntax();
     public abstract void perform(Player player, String[] args);
+
+    /**
+     * Optional tab-completion for the arguments following this subcommand.
+     * Returns an empty list by default.
+     */
+    public List<String> tabComplete(Player player, String[] args) {
+        return Collections.emptyList();
+    }
 }

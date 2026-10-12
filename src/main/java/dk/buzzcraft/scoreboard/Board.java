@@ -1,14 +1,15 @@
 package dk.buzzcraft.scoreboard;
 
 import dk.buzzcraft.data.PlayerData;
+import dk.buzzcraft.systems.SnusManager;
 import dk.buzzcraft.utils.PlayerDataUtility;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import net.md_5.bungee.api.ChatColor;
 
 public class Board implements Runnable {
     private final static Board instance = new Board();
@@ -23,56 +24,66 @@ public class Board implements Runnable {
                 } else {
                     createNewScoreboard(player);
                 }
-            } else {
+            } else if (player.getScoreboard().getObjective("BuzzCraft") != null) {
                 player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
             }
         }
     }
 
     private void createNewScoreboard(Player player) {
-        PlayerData data = PlayerDataUtility.loadPlayerData(player);
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        Objective objective = scoreboard.registerNewObjective("BuzzCraft", "dummy", ChatColor.AQUA + "" + ChatColor.BOLD+ "BuzzCraft");
+        Objective objective = scoreboard.registerNewObjective("BuzzCraft", "dummy",
+                ChatColor.AQUA + "" + ChatColor.BOLD + "BuzzCraft");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        objective.getScore(ChatColor.WHITE + " ").setScore(8);
-        objective.getScore(ChatColor.WHITE + " ").setScore(5);
-        objective.getScore(ChatColor.AQUA + "Buffs").setScore(4);
-        objective.getScore(ChatColor.WHITE + "Strength II").setScore(3);
-        objective.getScore(ChatColor.WHITE + " ").setScore(2);
+        objective.getScore(ChatColor.WHITE + " ").setScore(6);
+        objective.getScore(ChatColor.AQUA + "Buffs").setScore(5);
 
-        // Snus Taken
+        // Current buff/debuff summary (dynamic)
+        Team buffs = scoreboard.registerNewTeam("buffs");
+        String buffsKey = ChatColor.WHITE.toString();
+        buffs.addEntry(buffsKey);
+        objective.getScore(buffsKey).setScore(4);
+
+        objective.getScore(ChatColor.WHITE + "  ").setScore(3);
+
+        // Snus taken (dynamic)
         Team snusTaken = scoreboard.registerNewTeam("snusTaken");
-        // Needs to be unique in the scoreboard
-        String snusTakenTeamKey = ChatColor.GOLD.toString();
-
-        snusTaken.addEntry(snusTakenTeamKey);
+        String snusTakenKey = ChatColor.GOLD.toString();
+        snusTaken.addEntry(snusTakenKey);
         snusTaken.setPrefix("Snus taken: ");
-        // this should be the players snus count from playerdata
-        snusTaken.setSuffix(ChatColor.YELLOW + "" + data.getSnusTaken());
+        objective.getScore(snusTakenKey).setScore(2);
 
-        objective.getScore(snusTakenTeamKey).setScore(7);
+        // Tolerance (dynamic)
+        Team tolerance = scoreboard.registerNewTeam("tolerance");
+        String toleranceKey = ChatColor.GREEN.toString();
+        tolerance.addEntry(toleranceKey);
+        tolerance.setPrefix("Tolerance: ");
+        objective.getScore(toleranceKey).setScore(1);
 
-        // Snus Health
-        Team snusHealth = scoreboard.registerNewTeam("snusHealth");
-        // Needs to be unique in the scoreboard
-        String snusHealthTeamKey = ChatColor.GREEN.toString();
-
-        snusTaken.addEntry(snusHealthTeamKey);
-        snusTaken.setPrefix("Snus health: ");
-        // this should be the players snus count from playerdata
-        snusTaken.setSuffix(ChatColor.LIGHT_PURPLE + "" + data.getSnusHealth());
-
-        objective.getScore(snusHealthTeamKey).setScore(6);
         player.setScoreboard(scoreboard);
+        updateScoreboard(player);
     }
 
     private void updateScoreboard(Player player) {
         PlayerData data = PlayerDataUtility.loadPlayerData(player);
         Scoreboard scoreboard = player.getScoreboard();
+        SnusManager.Tier tier = SnusManager.tierFor(data.getTolerance());
+
         Team snusTaken = scoreboard.getTeam("snusTaken");
-        snusTaken.setSuffix(ChatColor.YELLOW + "" + (data.getSnusTaken()));
+        if (snusTaken != null) {
+            snusTaken.setSuffix(ChatColor.YELLOW + "" + data.getSnusTaken());
+        }
+        Team tolerance = scoreboard.getTeam("tolerance");
+        if (tolerance != null) {
+            tolerance.setSuffix(ChatColor.LIGHT_PURPLE + "" + data.getTolerance());
+        }
+        Team buffs = scoreboard.getTeam("buffs");
+        if (buffs != null) {
+            buffs.setSuffix(SnusManager.describeBuffs(tier));
+        }
     }
+
     public static Board getInstance() {
         return instance;
     }

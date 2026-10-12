@@ -2,7 +2,9 @@ package dk.buzzcraft;
 
 import dk.buzzcraft.commands.CommandManager;
 import dk.buzzcraft.events.GeneralEvents;
+import dk.buzzcraft.events.WorldLoot;
 import dk.buzzcraft.scoreboard.Board;
+import dk.buzzcraft.systems.ToleranceDecayTask;
 import dk.buzzcraft.utils.PlayerDataUtility;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -12,13 +14,18 @@ public final class BuzzCraft extends JavaPlugin {
     private final Logger logger = getLogger();
     private static BuzzCraft plugin;
     private BukkitTask boardTask;
+    private BukkitTask decayTask;
 
     @Override
     public void onEnable() {
         plugin = this;
         // Save the default config.yml
         this.saveDefaultConfig();
-        PlayerDataUtility.initialize(getDataFolder());
+        PlayerDataUtility.initialize(getDataFolder(), getConfig());
+
+        // Initialize the snus item and register its crafting recipe
+        SnusItem.init(this);
+        SnusItem.registerRecipe(this);
 
         // Show Ascii Title
         logger.info("   ____                 _____            __ _");
@@ -30,12 +37,19 @@ public final class BuzzCraft extends JavaPlugin {
 
         // Register event listeners
         getServer().getPluginManager().registerEvents(new GeneralEvents(), this);
+        getServer().getPluginManager().registerEvents(new WorldLoot(), this);
 
         // Register commands
-        getCommand("snus").setExecutor(new CommandManager());
+        CommandManager commandManager = new CommandManager();
+        getCommand("snus").setExecutor(commandManager);
+        getCommand("snus").setTabCompleter(commandManager);
 
         // Register tasks
         boardTask = getServer().getScheduler().runTaskTimer(this, Board.getInstance(), 0, 20);
+
+        int decayInterval = Math.max(1, getConfig().getInt("decayIntervalSeconds", 30));
+        long decayTicks = 20L * decayInterval;
+        decayTask = getServer().getScheduler().runTaskTimer(this, new ToleranceDecayTask(), decayTicks, decayTicks);
     }
 
     @Override
@@ -43,6 +57,9 @@ public final class BuzzCraft extends JavaPlugin {
         // Plugin shutdown logic
         if (boardTask != null && !boardTask.isCancelled()) {
             boardTask.cancel();
+        }
+        if (decayTask != null && !decayTask.isCancelled()) {
+            decayTask.cancel();
         }
     }
 
