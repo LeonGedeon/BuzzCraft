@@ -1,0 +1,60 @@
+# ============================================================
+#  BuzzCraft - Configuration
+# ============================================================
+
+# Health healed per Snus at the "Fresh" tolerance tier.
+# Higher tolerance tiers only heal a fraction of this value.
+healAmount: 10
+
+# Tolerance a brand-new player starts at, and the maximum value.
+startingTolerance: 0
+maxTolerance: 100
+
+# Tolerance gained every time a Snus is used.
+tolerancePerUse: 15
+
+# Tolerance recovery over time (so casual use is rewarded).
+decayAmount: 1
+decayIntervalSeconds: 30
+
+# Tier thresholds: the minimum tolerance at which each tier applies.
+tierThresholds:
+  tolerant: 30
+  dependent: 60
+  withdrawal: 90
+
+# Show the scoreboard sidebar by default for new players.
+showScoreboard: false
+
+# ------------------------------------------------------------
+#  Finding Snus in the world
+# ------------------------------------------------------------
+
+# Chance (0.0 - 1.0) that a generated loot chest contains Snus.
+lootChestChance: 0.1
+# Amount of Snus inserted when a chest loot roll succeeds.
+lootChestAmount: 1
+
+# Chance (0.0 - 1.0) that breaking a wild plant drops Snus.
+wildPlantChance: 0.05
+# Amount dropped per successful wild-plant roll.
+wildPlantAmount: 1
+# Blocks treated as "wild plants" that can drop Snus.
+wildPlantMaterials:
+  - GRASS
+  - FERN
+  - TALL_GRASS
+  - LARGE_FERN
+
+# ------------------------------------------------------------
+#  Tin of Pablo Mini
+# ------------------------------------------------------------
+
+# Tin of Pablo Mini: sneak + right-click a stack of Snus to compress it.
+# Snus consumed to pack one Tin.
+tin:
+  snusPerTin: 30
+  # Snus returned when a Tin is right-click unpacked.
+  snusPerUnpack: 30
+  # Custom model data for the compass-textured Tin (0 disables; used by a resource pack).
+  customModelData: 1

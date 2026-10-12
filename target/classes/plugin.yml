@@ -1,0 +1,45 @@
+name: BuzzCraft
+version: '1.0.27-SNAPSHOT'
+main: dk.buzzcraft.BuzzCraft
+api-version: '1.20'
+
+commands:
+  snus:
+    description: Main command for BuzzCraft plugin
+    usage: /snus
+
+permissions:
+  buzzcraft.use:
+    description: Allows using Snus items
+    default: true
+  buzzcraft.stats:
+    description: Allows viewing your own Snus stats
+    default: true
+  buzzcraft.stats.others:
+    description: Allows viewing other players' Snus stats
+    default: true
+    children:
+      buzzcraft.stats: true
+  buzzcraft.leaderboard:
+    description: Allows viewing the Snus leaderboard
+    default: true
+  buzzcraft.scoreboard:
+    description: Allows toggling the Snus scoreboard sidebar
+    default: true
+  buzzcraft.resettolerance:
+    description: Allows resetting player tolerance
+    default: op
+  buzzcraft.give:
+    description: Allows giving Snus and Snus tins
+    default: op
+  buzzcraft.admin:
+    description: Grants all BuzzCraft permissions
+    default: op
+    children:
+      buzzcraft.use: true
+      buzzcraft.stats: true
+      buzzcraft.stats.others: true
+      buzzcraft.leaderboard: true
+      buzzcraft.scoreboard: true
+      buzzcraft.resettolerance: true
+      buzzcraft.give: true

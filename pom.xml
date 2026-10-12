@@ -6,13 +6,13 @@
 
   <groupId>dk.buzzcraft</groupId>
   <artifactId>BuzzCraft</artifactId>
-  <version>1.0.26-SNAPSHOT</version>
+  <version>1.0.27-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>BuzzCraft</name>
 
   <properties>
-    <java.version>1.8</java.version>
+    <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -40,6 +40,19 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+          <!-- MockBukkit inspects java.class.path to detect the server API jar,
+               so keep the real jars instead of a manifest-only booter jar. -->
+          <useManifestOnlyJar>false</useManifestOnlyJar>
+          <!-- Lets ByteBuddy (used by MockBukkit to inject plugin proxies) access
+               ClassLoader.defineClass directly instead of its broken findClass path. -->
+          <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+        </configuration>
+      </plugin>
     </plugins>
     <resources>
       <resource>
@@ -58,14 +71,34 @@
           <id>sonatype</id>
           <url>https://oss.sonatype.org/content/groups/public/</url>
       </repository>
+      <repository>
+          <id>papermc</id>
+          <url>https://repo.papermc.io/repository/maven-public/</url>
+      </repository>
   </repositories>
 
   <dependencies>
+      <!-- Paper API is a superset of the Spigot API and is what MockBukkit v1.20 is
+           built against, keeping the test classpath free of conflicting Bukkit copies. -->
       <dependency>
-          <groupId>org.spigotmc</groupId>
-          <artifactId>spigot-api</artifactId>
+          <groupId>io.papermc.paper</groupId>
+          <artifactId>paper-api</artifactId>
           <version>1.20.4-R0.1-SNAPSHOT</version>
           <scope>provided</scope>
+      </dependency>
+
+      <!-- Testing -->
+      <dependency>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>junit-jupiter</artifactId>
+          <version>5.10.2</version>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>com.github.seeseemelk</groupId>
+          <artifactId>MockBukkit-v1.20</artifactId>
+          <version>3.87.0</version>
+          <scope>test</scope>
       </dependency>
   </dependencies>
 </project>
